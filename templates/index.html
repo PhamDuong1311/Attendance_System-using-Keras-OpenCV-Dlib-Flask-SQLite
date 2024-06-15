@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điểm Danh</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+    <h1>Dữ liệu Điểm Danh</h1>
+    <a href="/register" class="register-button">Đăng ký</a>
+    <div id="date-selector">
+        <label for="date">Chọn Ngày:</label>
+        <input type="date" id="date">
+        <button onclick="fetchData()">Xem</button>
+    </div>
+    <table id="danhgia-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Họ tên</th>
+                <th>Thời gian Điểm Danh</th>
+            </tr>
+        </thead>
+        <tbody id="danhgia-list"></tbody>
+    </table>
+
+    <script>
+        function formatLocalDate(dateString) {
+            const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+            const localDate = new Date(dateString);
+            return localDate.toLocaleDateString('vi-VN', options);
+        }
+
+        function fetchData() {
+            const selectedDate = document.getElementById('date').value;
+
+            fetch(`/get_danhgia?date=${selectedDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    const danhgiaList = document.getElementById('danhgia-list');
+                    danhgiaList.innerHTML = '';
+
+                    if (data.length === 0) {
+                        const row = danhgiaList.insertRow();
+                        const cell = row.insertCell(0);
+                        cell.colSpan = 3;
+                        cell.textContent = 'Không có dữ liệu cho ngày này.';
+                    } else {
+                        data.forEach(item => {
+                            const row = danhgiaList.insertRow();
+                            const cell1 = row.insertCell(0);
+                            const cell2 = row.insertCell(1);
+                            const cell3 = row.insertCell(2);
+
+                            cell1.textContent = item.id;
+                            cell2.textContent = item.student_id;
+                            cell3.textContent = formatLocalDate(item.time);  
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy dữ liệu:', error);
+                });
+        }
+
+        setInterval(fetchData, 5000);
+
+        fetchData();
+    </script>
+</body>
+</html>
+
